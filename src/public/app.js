@@ -40,13 +40,6 @@ function onYouTubeIframeAPIReady() {
 const onPlayerReady = event => {
 	player.playVideo();
 
-	setInterval(() => {
-		socket.emit('stateChange', {
-			state: player.getPlayerState(),
-			time: player.getCurrentTime()
-		});
-	}, 2000);
-
 	socket.on('updateState', data => {
 		const state = player.getPlayerState();
 		const time = player.getCurrentTime();
@@ -75,11 +68,6 @@ const onPlayerStateChange = event => {
 		time
 	});
 };
-
-socket.onAny((event, ...args) => {
-	console.log(event);
-	console.log(args);
-});
 
 socket.on('error', data => M.toast({ html: `<span class="red-text">Error: ${data.error}</span>` }));
 socket.on('connect', () => {
