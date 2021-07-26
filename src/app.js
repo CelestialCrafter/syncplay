@@ -54,6 +54,6 @@ io.on('connection', socket => {
 	});
 });
 
-app.use(express.static(path.resolve('public/')));
+app.use(express.static(path.resolve('src/public/')));
 
 httpServer.listen(8080);

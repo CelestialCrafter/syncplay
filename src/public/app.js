@@ -14,15 +14,8 @@ const roomId = document.getElementById('roomId');
 const currentRoomId = document.getElementById('currentRoomId');
 
 function onYouTubeIframeAPIReady() {
-	submitRoom.addEventListener('click', event => {
-		event.preventDefault();
-		socket.emit('joinRoom', roomInput.value);
-	});
-
-	submitVideo.addEventListener('click', event => {
-		event.preventDefault();
-		socket.emit('updateVideo', videoInput.value);
-	});
+	submitRoom.addEventListener('click', event => socket.emit('joinRoom', roomInput.value));
+	submitVideo.addEventListener('click', event => socket.emit('updateVideo', videoInput.value));
 
 	socket.on('roomVideo', videoId => {
 		player?.destroy();
@@ -82,6 +75,11 @@ const onPlayerStateChange = event => {
 		time
 	});
 };
+
+socket.onAny((event, ...args) => {
+	console.log(event);
+	console.log(args);
+});
 
 socket.on('error', data => M.toast({ html: `<span class="red-text">Error: ${data.error}</span>` }));
 socket.on('connect', () => {
