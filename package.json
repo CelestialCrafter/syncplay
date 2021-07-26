@@ -1,0 +1,12 @@
+{
+	"name": "syncplay",
+	"version": "1.0.0",
+	"main": "src/app.js",
+	"author": "CelestialCrafter <celestialcraftermc@gmail.com> (https://github.com/CelestialCrafter)",
+	"license": "MIT",
+	"description": "Syncs youtube between devices",
+	"dependencies": {
+		"express": "^4.17.1",
+		"socket.io": "^4.1.3"
+	}
+}

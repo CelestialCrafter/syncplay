@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+	<script src="https://www.youtube.com/iframe_api"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+
+	<script src="app.js" defer></script>
+	<title>SyncPlay</title>
+</head>
+
+<body class="brown lighten-5">
+	<div class="row" style="margin-top: 30px;">
+		<div class="col s6">
+			<div id="player"></div>
+		</div>
+		<div class="col s6">
+			<div class="row">
+				<div class="col s8">
+					<div class="row">
+						<div class="input-field col s12">
+							<input type="text" required id="roomInput" class="col s6" autocomplete="off">
+							<label for="roomInput">Room ID</label>
+						</div>
+						<div class="input-field col s12">
+							<label for="videoInput">Video URL</label>
+							<input type="text" id="videoInput" class="col s6" autocomplete="off">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col s6">
+					<input type="submit" id="submitRoom" value="Join Room" class="btn red accent-2">
+					<input type="submit" id="submitVideo" value="Play Video" class="btn red accent-2">
+					<p>Your Room ID is <code id="roomId"></code></p>
+					<p>Current Room: <code id="currentRoomId"></code></p>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
