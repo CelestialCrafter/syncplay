@@ -1,4 +1,5 @@
 const express = require('express');
+const axios = require('axios');
 const http = require('http');
 const path = require('path');
 
@@ -28,17 +29,19 @@ io.on('connection', socket => {
 	});
 
 	socket.on('updateVideo', video => {
-		if (!socket.room) return socket.emit('error', { error: 'No Room' });
-
-		const videoId = video.replace(/.+\?v=/, '');
 		if (!video) return socket.emit('error', { error: 'No Video' });
-		roomData[socket.room].video = videoId;
 
-		io.to(socket.room).emit('roomVideo', roomData[socket.room].video);
+		const videoURL = new URL(video);
+		const videoId = videoURL.searchParams.get('v');
+		if (!videoId) return socket.emit('error', { error: 'Invalid Video' });
+
+		axios.get(`http://img.youtube.com/vi/${encodeURIComponent(videoId)}/0.jpg`).then(res => {
+			roomData[socket.room].video = videoId;
+			io.to(socket.room).emit('roomVideo', roomData[socket.room].video);
+		}).catch(() => socket.emit('error', { error: 'Invalid Video' }));
 	});
 
 	socket.on('stateChange', data => {
-		if (!socket.room) return socket.emit('error', { error: 'No Room' });
 		let updatedData = data;
 
 		// Converts all states to play/pause

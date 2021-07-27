@@ -10,8 +10,10 @@ const videoInput = document.getElementById('videoInput');
 const roomInput = document.getElementById('roomInput');
 const submitVideo = document.getElementById('submitVideo');
 const submitRoom = document.getElementById('submitRoom');
+const shareRoom = document.getElementById('shareRoom');
 const roomId = document.getElementById('roomId');
 const currentRoomId = document.getElementById('currentRoomId');
+let currentRoom = '';
 
 function onYouTubeIframeAPIReady() {
 	submitRoom.addEventListener('click', event => socket.emit('joinRoom', roomInput.value));
@@ -33,7 +35,7 @@ function onYouTubeIframeAPIReady() {
 			}
 		});
 
-		M.toast({ html: '<span class="green-text">Changed Video!</span>' });
+		M.toast({ html: 'Changed Video!' });
 	});
 }
 
@@ -71,11 +73,19 @@ const onPlayerStateChange = event => {
 
 socket.on('error', data => M.toast({ html: `<span class="red-text">Error: ${data.error}</span>` }));
 socket.on('connect', () => {
-	M.toast({ html: '<span class="green-text">Connected to server!</span>' });
+	M.toast({ html: 'Connected to server!' });
+	shareRoom.addEventListener('click', event => {
+		M.toast({ html: 'Copied to clipboard!' });
+		navigator.clipboard.writeText(`${window.location.origin}/#${currentRoom}`);
+	});
+
 	roomId.innerText = socket.id;
+	if (window.location.hash) M.toast({ html: 'Detected room hash! Joining room.' });
+	socket.emit('joinRoom', window.location.hash.substring(1));
 });
 socket.on('disconnect', () => M.toast({ html: '<span class="yellow-text">Disconnected from server</span>' }));
 socket.on('currentRoom', room => {
-	socket.id === room ? currentRoomId.innerText = 'Your Room' : currentRoomId.innerText = room;
-	M.toast({ html: '<span class="green-text">Joined Room!</span>' });
+	currentRoom = room;
+	currentRoomId.innerText = room;
+	socket.id === room ? null : M.toast({ html: 'Joined Room!' });
 });
