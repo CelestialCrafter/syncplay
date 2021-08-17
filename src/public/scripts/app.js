@@ -1,9 +1,8 @@
+/* eslint-disable require-jsdoc */
 /* eslint-disable no-undef */
 
 let player;
 let recentlyUpdated = false;
-let prevState = -1;
-let prevTime = 0;
 const socket = io(window.location.origin);
 
 const videoInput = document.getElementById('videoInput');
@@ -15,9 +14,13 @@ const roomId = document.getElementById('roomId');
 const currentRoomId = document.getElementById('currentRoomId');
 let currentRoom = '';
 
+// eslint-disable-next-line no-unused-vars
 function onYouTubeIframeAPIReady() {
 	submitRoom.addEventListener('click', event => socket.emit('joinRoom', roomInput.value));
-	submitVideo.addEventListener('click', event => socket.emit('updateVideo', videoInput.value));
+	submitVideo.addEventListener('click', event => {
+		if (currentRoom !== socket.id) return M.toast({ html: `<span class="red-text">Error: Not Leader</span>` });
+		socket.emit('updateVideo', videoInput.value);
+	});
 
 	socket.on('roomVideo', videoId => {
 		player?.destroy();
@@ -42,34 +45,35 @@ function onYouTubeIframeAPIReady() {
 const onPlayerReady = event => {
 	player.playVideo();
 
+	socket.emit('getState');
+
 	socket.on('updateState', data => {
-		const state = player.getPlayerState();
+		console.log('state updated')
 		const time = player.getCurrentTime();
 
-		// Make the video smoother
 		if (time !== data.time) player.seekTo(data.time, true);
 		if (data.state === YT.PlayerState.PLAYING) player.playVideo();
 		else player.pauseVideo();
 
 		recentlyUpdated = true;
-		setTimeout(() => recentlyUpdated = false, 100);
+		setTimeout(() => recentlyUpdated = false, 1000);
 	});
 };
 
 const onPlayerStateChange = event => {
-	const time = player.getCurrentTime();
-
-	// Prevent the state from spam updating
+	if (currentRoom !== socket.id) return;
 	if (recentlyUpdated) return;
-	if (event.data === prevState) return;
-	// Only update if skipped ahead atleast 1 second
-	if (!(time - prevTime > 1 && time - prevTime < 1)) return;
 
 	socket.emit('stateChange', {
 		state: event.data,
-		time
+		time: player.getCurrentTime()
 	});
+
+	recentlyUpdated = true;
+	setTimeout(() => recentlyUpdated = false, 100);
 };
+
+socket.onAny(console.log);
 
 socket.on('error', data => M.toast({ html: `<span class="red-text">Error: ${data.error}</span>` }));
 socket.on('connect', () => {
@@ -80,12 +84,19 @@ socket.on('connect', () => {
 	});
 
 	roomId.innerText = socket.id;
-	if (window.location.hash) M.toast({ html: 'Detected room hash! Joining room.' });
-	socket.emit('joinRoom', window.location.hash.substring(1));
+	if (window.location.hash) {
+		M.toast({ html: 'Detected room hash! Joining room.' });
+		socket.emit('joinRoom', window.location.hash.substring(1));
+	}
 });
 socket.on('disconnect', () => M.toast({ html: '<span class="yellow-text">Disconnected from server</span>' }));
 socket.on('currentRoom', room => {
+	player?.destroy();
 	currentRoom = room;
 	currentRoomId.innerText = room;
 	socket.id === room ? null : M.toast({ html: 'Joined Room!' });
+});
+socket.on('defaultRoom', room => {
+	currentRoom = room;
+	currentRoomId.innerText = room;
 });
